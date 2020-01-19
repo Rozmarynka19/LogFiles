@@ -141,33 +141,37 @@ int main(int argc, char *argv[])
 
 		//tworzenie napisu-zawartosci pliku
 		char* content = malloc(sizeof(char) * 50);
-		char* tab = malloc(sizeof(char) * 2);
-		tab[0] = '\t';
-		tab[1] = '\0';
+		char* newLine = malloc(sizeof(char) * 2);
+		newLine[0] = '\n';
+		newLine[1] = '\0';
 
 		strncat(content, asctime(&(log.date)),strlen(asctime(&(log.date)))-1);
 		//strncat(content, fileName,strlen(fileName)-4);
 		strcat(content, " ");
 		strcat(content, log.argument);
+		strcat(content, newLine);
 		printf("%s", content);
 
 		//praca na pliku
-		int descriptor = open(fileName, _O_BINARY| _O_WRONLY | _O_CREAT, _S_IREAD | _S_IWRITE);
-		if (descriptor < 0) write(2, "Open file error!\n", strlen("Open file error!\n"));
-		//_setmode(descriptor, _O_BINARY);
+		int descriptor = _open(fileName, _O_WRONLY | _O_CREAT | _O_BINARY | _O_APPEND, _S_IREAD | _S_IWRITE);
+		if (descriptor < 0) _write(2, "Open file error!\n", strlen("Open file error!\n"));
+		_setmode(descriptor, _O_BINARY);
+		//FILE * f = fopen(fileName, "awb");
 
 		int wr = _write(descriptor, content, strlen(content));
-		if (wr<0) write(2, "Write file error!\n", strlen("Write file error!\n"));
+		if (wr<0) _write(2, "Write file error!\n", strlen("Write file error!\n"));
+		//fwrite(content, sizeof(char), strlen(content), f);
 
-		int cl = close(descriptor);
-		if(cl<0) write(2, "Close file error!\n", strlen("Close file error!\n"));
+		int cl = _close(descriptor);
+		if(cl<0) _write(2, "Close file error!\n", strlen("Close file error!\n"));
+		//fclose(f);
 
 		//zwolnienie zaalokowanej pamieci
 		free(fileName);
 		free(buffer);
 		free(dot);
 		free(content);
-		free(tab);
+		free(newLine);
 	}
 	if (opt == 'r')
 	{
