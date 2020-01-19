@@ -9,6 +9,7 @@
 #include <windows.h>
 #include <unistd.h> //getopt()
 #include <time.h> //ctime()
+#include <share.h>
 
 #include <stdio.h>
 
@@ -138,11 +139,35 @@ int main(int argc, char *argv[])
 		strcat(fileName, extension);
 		//printf("%s", fileName);
 
+		//tworzenie napisu-zawartosci pliku
+		char* content = malloc(sizeof(char) * 50);
+		char* tab = malloc(sizeof(char) * 2);
+		tab[0] = '\t';
+		tab[1] = '\0';
 
+		strncat(content, asctime(&(log.date)),strlen(asctime(&(log.date)))-1);
+		//strncat(content, fileName,strlen(fileName)-4);
+		strcat(content, " ");
+		strcat(content, log.argument);
+		printf("%s", content);
 
+		//praca na pliku
+		int descriptor = open(fileName, _O_BINARY| _O_WRONLY | _O_CREAT, _S_IREAD | _S_IWRITE);
+		if (descriptor < 0) write(2, "Open file error!\n", strlen("Open file error!\n"));
+		//_setmode(descriptor, _O_BINARY);
+
+		int wr = _write(descriptor, content, strlen(content));
+		if (wr<0) write(2, "Write file error!\n", strlen("Write file error!\n"));
+
+		int cl = close(descriptor);
+		if(cl<0) write(2, "Close file error!\n", strlen("Close file error!\n"));
+
+		//zwolnienie zaalokowanej pamieci
 		free(fileName);
 		free(buffer);
 		free(dot);
+		free(content);
+		free(tab);
 	}
 	if (opt == 'r')
 	{
