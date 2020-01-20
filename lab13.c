@@ -139,26 +139,27 @@ int main(int argc, char *argv[])
 		strcat(fileName, extension);
 		//printf("%s", fileName);
 
-		//tworzenie napisu-zawartosci pliku
-		char* content = malloc(sizeof(char) * 50);
-		char* newLine = malloc(sizeof(char) * 2);
-		newLine[0] = '\n';
-		newLine[1] = '\0';
+		////tworzenie napisu-zawartosci pliku
+		//char* content = malloc(sizeof(char) * 50);
+		//char* newLine = malloc(sizeof(char) * 2);
+		//newLine[0] = '\n';
+		//newLine[1] = '\0';
 
-		strncat(content, asctime(&(log.date)),strlen(asctime(&(log.date)))-1);
-		//strncat(content, fileName,strlen(fileName)-4);
-		strcat(content, " ");
-		strcat(content, log.argument);
-		strcat(content, newLine);
-		printf("%s", content);
+		//strncat(content, asctime(&(log.date)),strlen(asctime(&(log.date)))-1);
+		////strncat(content, fileName,strlen(fileName)-4);
+		//strcat(content, " ");
+		//strcat(content, log.argument);
+		//strcat(content, newLine);
+		//printf("%s", content);
 
 		//praca na pliku
 		int descriptor = _open(fileName, _O_WRONLY | _O_CREAT | _O_BINARY | _O_APPEND, _S_IREAD | _S_IWRITE);
 		if (descriptor < 0) _write(2, "Open file error!\n", strlen("Open file error!\n"));
-		_setmode(descriptor, _O_BINARY);
+		//_setmode(descriptor, _O_BINARY);
 		//FILE * f = fopen(fileName, "awb");
 
-		int wr = _write(descriptor, content, strlen(content));
+		int wr = _write(descriptor, &log, sizeof(struct Log));
+		printf("Written: %d", wr);
 		if (wr<0) _write(2, "Write file error!\n", strlen("Write file error!\n"));
 		//fwrite(content, sizeof(char), strlen(content), f);
 
@@ -170,12 +171,46 @@ int main(int argc, char *argv[])
 		free(fileName);
 		free(buffer);
 		free(dot);
-		free(content);
-		free(newLine);
+		//free(content);
+		//free(newLine);
 	}
 	if (opt == 'r')
 	{
+		WIN32_FIND_DATAA 
+		struct Log log;
+		
 
+		int descriptor = _open("2020.01.20.13.17.log", _O_RDONLY | _O_BINARY);
+		if (descriptor < 0) _write(2, "Open file error!\n", strlen("Open file error!\n"));
+
+		//printf("size of struct Log: %d", sizeof(struct Log));
+		int ls = lseek(descriptor, (-1)*(int)sizeof(struct Log), SEEK_END);
+		//int ls = lseek(descriptor, 0, SEEK_END);
+		//printf("Current position: %d", ls);
+		if(ls<0)_write(2, "Seek error!\n", strlen("Seek error!\n"));
+		
+
+		int rd = read(descriptor, &log, sizeof(struct Log));
+		//printf("Read: %d", rd);
+		if (rd < 0) _write(2, "Read file error!\n", strlen("Read file error!\n"));
+		
+		int cl = _close(descriptor);
+		if (cl < 0) _write(2, "Close file error!\n", strlen("Close file error!\n"));
+		
+		//char* content = malloc(sizeof(char) * 100);
+		//printf("%s", asctime(&(log.date)));
+		//printf("size of log: %d", sizeof(log));
+		/*strncat(content, asctime(&(log.date)), strlen(asctime(&(log.date))) - 1);
+		printf("ok");
+		strcat(content, " ");
+		
+		strcat(content, log.argument);*/
+		
+
+		write(1, asctime(&(log.date)), strlen(asctime(&(log.date))));
+		write(1, log.argument, strlen(log.argument));
+
+		//free(content);
 	}
 
 	return 0;
