@@ -13,6 +13,12 @@
 
 #include <stdio.h>
 
+//struct FileData
+//{
+//	CHAR FileName;
+//	FILETIME WriteTime;
+//};
+
 struct Log
 {
 	struct tm date;
@@ -159,7 +165,7 @@ int main(int argc, char *argv[])
 		//FILE * f = fopen(fileName, "awb");
 
 		int wr = _write(descriptor, &log, sizeof(struct Log));
-		printf("Written: %d", wr);
+		//printf("Written: %d", wr);
 		if (wr<0) _write(2, "Write file error!\n", strlen("Write file error!\n"));
 		//fwrite(content, sizeof(char), strlen(content), f);
 
@@ -176,11 +182,68 @@ int main(int argc, char *argv[])
 	}
 	if (opt == 'r')
 	{
-		WIN32_FIND_DATAA 
+		WIN32_FIND_DATAA findFileData;
+		HANDLE hFindFile;
+		//struct FileData* fileDataArray = malloc(sizeof(struct FileData) * 20); //it means that my app require max 20 files in the directory
+		//struct FileData fileDataArray[35];
 		struct Log log;
-		
+		int fileDataArrayIterator = 0;
 
-		int descriptor = _open("2020.01.20.13.17.log", _O_RDONLY | _O_BINARY);
+		//retreving info about all (max 20) *.log files
+		hFindFile = FindFirstFileA("*.log", &findFileData);
+		if (GetLastError() == ERROR_FILE_NOT_FOUND)
+		{
+			_write(2, "Searching for latest file error - file doesn't exist!\n", strlen("Searching for latest file error - file doesn't exist!\n"));
+			return 1;
+		}
+		if (hFindFile == INVALID_HANDLE_VALUE)
+		{
+			_write(2, "Searching for latest file error - wrong file name!\n", strlen("Searching for latest file error - wrong file name!\n"));
+			return 1;
+		}
+		
+		//else
+		//{
+		//	fileDataArray[fileDataArrayIterator].FileName = *(findFileData.cFileName);
+		//	fileDataArray[fileDataArrayIterator].WriteTime = findFileData.ftLastWriteTime;
+		//	/*printf("przed");
+		//	printf("%s", &(fileDataArray[fileDataArrayIterator].FileName));
+		//	printf("po");*/
+		//	fileDataArrayIterator++;
+		//}
+
+		do
+		{
+			/*printf("%s\n", findFileData.cFileName);
+			fileDataArray[fileDataArrayIterator].FileName = *(findFileData.cFileName);
+			fileDataArray[fileDataArrayIterator].WriteTime = findFileData.ftLastWriteTime;
+			fileDataArrayIterator++;*/
+
+		} while (FindNextFile(hFindFile, &findFileData) != 0);
+		////////////////////////////////////////////////////
+
+		////sorting fileDataArray by WriteTime
+		//int j;
+		//struct FileData temp;
+		//for (int i = 1; i < fileDataArrayIterator; i++)
+		//{
+		//	//wstawienie elementu w odpowiednie miejsce
+		//	temp = fileDataArray[i]; //ten element bêdzie wstawiony w odpowiednie miejsce
+		//	j = i - 1;
+
+		//	//przesuwanie elementów wiêkszych od pom
+		//	while (j >= 0 && CompareFileTime(&(fileDataArray[j].WriteTime), &(temp.WriteTime)))
+		//	{
+		//		fileDataArray[j + 1] = fileDataArray[j]; //przesuwanie elementów
+		//		--j;
+		//	}
+		//	fileDataArray[j + 1] = temp; //wstawienie pom w odpowiednie miejsce
+		//}
+		//////////////////////////////////////////////////////
+
+		FindClose(hFindFile);
+		printf("%s", findFileData.cFileName);
+		int descriptor = _open(findFileData.cFileName, _O_RDONLY | _O_BINARY);
 		if (descriptor < 0) _write(2, "Open file error!\n", strlen("Open file error!\n"));
 
 		//printf("size of struct Log: %d", sizeof(struct Log));
